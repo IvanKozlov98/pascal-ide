@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij' version '1.1.2' // '0.6.3' //
+    id "org.jetbrains.grammarkit" version "2021.1.3"
+}
+
+sourceCompatibility = 1.8
+
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.jetbrains.intellij'
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+//task wrapper(type: Wrapper) {
+//    gradleVersion = '7.0'
+//}
+
+patchPluginXml {
+    sinceBuild = '212'
+    untilBuild = '222'
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
+}
+
+idea.module.generatedSourceDirs += file('gen')
+
+sourceSets.main.java.srcDirs += 'gen'
+
+intellij {
+    pluginName = 'Pascal'
+    version = '2021.2.3'
+    downloadSources = true
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
+
+task lexer(type: org.jetbrains.grammarkit.tasks.GenerateLexer) {
+    source = "$project.projectDir/src/main/java/com/itmo/pascal/lang/_PascalLexer.flex"
+    targetDir = "gen/com/itmo/pascal/lexer"
+    targetClass = "PascalLexerGenerated"
+}
+
+tasks.compileJava.dependsOn lexer
