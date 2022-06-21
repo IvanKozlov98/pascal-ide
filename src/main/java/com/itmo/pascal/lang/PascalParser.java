@@ -50,11 +50,10 @@ public class PascalParser implements PsiParser {
         }
 
         private boolean expectAdvance(PascalTokenType expectedTokenType, String expectedName) {
-            if (builder.getTokenType().equals(expectedTokenType)) {
+            if (isEqualCurToken(expectedTokenType)) {
                 advance();
                 return true;
             } else {
-                System.out.println(builder.getTokenText());
                 builder.error(expectedName);
                 return false;
             }
@@ -309,7 +308,8 @@ public class PascalParser implements PsiParser {
         }
 
         private boolean isEqualCurToken(PascalTokenType tokenType) {
-            return builder.getTokenType().equals(tokenType);
+            IElementType curToken = builder.getTokenType();
+            return curToken != null && curToken.equals(tokenType);
         }
 
         // unsigned-constant = integer-number |
@@ -345,11 +345,14 @@ public class PascalParser implements PsiParser {
                 advance();
                 parseExpression();
                 expectAdvance(PascalTokenType.RPAREN, ")");
-            } else if (isEqualCurToken(PascalTokenType.ID) &&
-                    builder.lookAhead(1).equals(PascalTokenType.LPAREN))
-                parseProcedureCalling();
-            else if (!tryParseUnsignedConstant())
-                errorAdvance("Expected unsigned-constant, variable, (expr), function calling or not factor");
+            } else {
+                IElementType tokenAhead = builder.lookAhead(1);
+                if (isEqualCurToken(PascalTokenType.ID) &&
+                        (tokenAhead != null && tokenAhead.equals(PascalTokenType.LPAREN)))
+                    parseProcedureCalling();
+                else if (!tryParseUnsignedConstant())
+                    errorAdvance("Expected unsigned-constant, variable, (expr), function calling or not factor");
+            }
             mark.done(PascalElementType.FACTOR);
         }
 
@@ -445,8 +448,9 @@ public class PascalParser implements PsiParser {
             if (isEqualCurToken(PascalTokenType.PROCEDURE))
                 parseProcedure();
             else {
+                IElementType tokenAhead = builder.lookAhead(1);
                 if (isEqualCurToken(PascalTokenType.ID) &&
-                    builder.lookAhead(1).equals(PascalTokenType.ASSIGN))
+                    (tokenAhead != null && tokenAhead.equals(PascalTokenType.ASSIGN)))
                     parseAssignmentStatement();
                 else
                     parseProcedureCalling();
