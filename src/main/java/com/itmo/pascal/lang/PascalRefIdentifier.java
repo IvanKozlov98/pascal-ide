@@ -24,7 +24,7 @@ public class PascalRefIdentifier extends PascalPsiElement {
 
     private ASTNode lookInConstVars(ASTNode constantDef) {
         ASTNode identifier = constantDef.findChildByType(PascalElementType.IDENTIFIER);
-        if (identifier.getText().equals(getNode().getText()))
+        if (identifier != null && identifier.getText().equals(getNode().getText()))
             return identifier;
         else
             return null;
