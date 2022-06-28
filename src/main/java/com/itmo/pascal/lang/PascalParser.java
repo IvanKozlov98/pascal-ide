@@ -539,6 +539,8 @@ public class PascalParser implements PsiParser {
             parseStatement();
             while (isEqualCurToken(PascalTokenType.SEMICOLON)) {
                 advance();
+                if (isEqualCurToken(PascalTokenType.END))
+                    break;
                 parseStatement();
             }
             mark.done(PascalElementType.STATEMENT_SEQ);
