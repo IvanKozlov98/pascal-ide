@@ -46,5 +46,5 @@ public class PascalElementType extends IElementType {
     public static PascalElementType FUNCTION = new PascalElementType("FUNCTION");
     public static PascalElementType VARIABLE_DECLARATION = new PascalElementType("VARIABLE_DECLARATION");
     public static PascalElementType TYPE = new PascalElementType("TYPE");
-
+    public static PascalElementType GARBAGE_AT_THE_END_OF_FILE = new PascalElementType("GARBAGE_AT_THE_END_OF_FILE");
 }

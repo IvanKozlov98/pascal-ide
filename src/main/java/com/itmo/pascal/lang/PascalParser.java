@@ -268,6 +268,11 @@ public class PascalParser implements PsiParser {
             mark.done(PascalElementType.FUNCTION);
         }
 
+        private boolean isEqualCurToken(PascalTokenType tokenType) {
+            IElementType curToken = builder.getTokenType();
+            return curToken != null && curToken.equals(tokenType);
+        }
+
         // declaration-group =
         //             constant-definition-group |
         //             variable-declaration-group |
@@ -305,11 +310,6 @@ public class PascalParser implements PsiParser {
                 mark.done(PascalElementType.DECLARATION);
             else
                 mark.drop();
-        }
-
-        private boolean isEqualCurToken(PascalTokenType tokenType) {
-            IElementType curToken = builder.getTokenType();
-            return curToken != null && curToken.equals(tokenType);
         }
 
         // unsigned-constant = integer-number |
@@ -561,12 +561,34 @@ public class PascalParser implements PsiParser {
             mark.done(PascalElementType.BLOCK);
         }
 
+        private void parseGarbage() {
+            PsiBuilder.Marker mark = builder.mark();
+            builder.error("Expected program heading or block");
+            while (builder.getTokenType() != null) {
+                if (isEqualCurToken(PascalTokenType.PROGRAM))
+                    parseProgramHeading();
+                else if (isEqualCurToken(PascalTokenType.VAR) ||
+                         isEqualCurToken(PascalTokenType.CONST) ||
+                         isEqualCurToken(PascalTokenType.PROCEDURE) ||
+                         isEqualCurToken(PascalTokenType.FUNCTION)
+                )
+                    parseDeclarativePart();
+                else if (!tryParseStructuredStatement())
+                    advance();
+            }
+            mark.done(PascalElementType.GARBAGE_AT_THE_END_OF_FILE);
+        }
+
         // program = program-heading ';' program-block
         public void parseContractModule() {
             PsiBuilder.Marker marker = builder.mark();
             parseProgramHeading();
             expectAdvance(PascalTokenType.SEMICOLON, ";");
             parseBlock();
+            // parse rest of file
+            if (builder.getTokenType() != null)
+                parseGarbage();
+            //
             marker.done(PascalElementType.PASCAL_CONTRACT_FILE);
         }
     }
