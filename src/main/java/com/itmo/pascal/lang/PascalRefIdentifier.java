@@ -12,11 +12,13 @@ public class PascalRefIdentifier extends PascalPsiElement {
     }
 
     private ASTNode lookInDeclaredVars(ASTNode varsDeclaration) {
-        for (ASTNode child : varsDeclaration.getChildren(null)) {
-            ASTNode identifier = child.findChildByType(PascalElementType.IDENTIFIER);
+        ASTNode ids = varsDeclaration.findChildByType(PascalElementType.PARAMETERS);
+        if (ids == null)
+            return null;
 
-            if (identifier != null && identifier.getText().equals(getNode().getText()))
-                return identifier;
+        for (ASTNode child : ids.getChildren(null)) {
+            if (child.getText().equals(getNode().getText()))
+                return child;
         }
 
         return null;
